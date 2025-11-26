@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Yap - Vahid Can Culfa</title>
+    <title>Giriş Yap </title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -211,4 +211,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
+
 </html>
