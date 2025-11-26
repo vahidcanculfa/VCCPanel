@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCC SUDOKU</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f7fa;
+            --accent-color: #1890ff;
+            --text-primary: #1f1f1f;
+            --text-secondary: #595959;
+            --cell-bg: #ffffff;
+            --fixed-cell: #f0f0f0;
+            --border-color: #d9d9d9;
+            --error-color: #ff4d4f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: calc(100% - 60px);
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #main-menu {
+            display: flex;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #1890ff, #69c0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .menu-btn {
+            background: var(--bg-primary);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 15px 30px;
+            margin: 10px;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-btn:hover {
+            background: #e6f7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(24, 144, 255, 0.2);
+        }
+
+        #game-screen {
+            flex-direction: column;
+            padding-top: 10px;
+        }
+
+        #sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 1px;
+            margin: 20px auto;
+            background: var(--border-color);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: var(--cell-bg);
+            transition: all 0.2s ease;
+        }
+
+        .cell.fixed {
+            background: var(--fixed-cell);
+            font-weight: 500;
+        }
+
+        .cell.selected {
+            background: var(--accent-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
+        }
+
+        .cell.error {
+            background: #fff1f0;
+            color: var(--error-color);
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .settings-container {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .difficulty-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VCC SUDOKU</h1>
+    </div>
+
+    
+    <div class="screen" id="main-menu">
+        <h1 class="logo">VCC</h1>
+        <button class="menu-btn" id="play-btn">OYNA</button>
+        <button class="menu-btn" id="settings-btn">AYARLAR</button>
+    </div>
+
+   
+    <div class="screen" id="game-screen">
+        <button class="back-btn" id="game-back-btn">←</button>
+        <div class="difficulty-badge" id="difficulty-badge">KOLAY</div>
+        <div id="sudoku-grid"></div>
+        
+        <div class="control-panel">
+            <button class="control-btn" id="hint-btn">İPUCU</button>
+            <button class="control-btn" id="check-btn">KONTROL ET</button>
+        </div>
+    </div>
+
+  
+    <div class="screen" id="settings-menu">
+        <button class="back-btn" id="back-btn">←</button>
+        <div class="settings-container">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--accent-color)">AYARLAR</h2>
+            <div style="margin-bottom: 15px;">
+                <p style="margin-bottom: 5px;">Zorluk:</p>
+                <select id="difficulty-select" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <option value="easy">Kolay</option>
+                    <option value="medium">Orta</option>
+                    <option value="hard">Zor</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let board = [];
+        let solution = [];
+        let currentLevel = 'easy';
+        let selectedCell = null;
+
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            document.getElementById(screenId).style.display = 'flex';
+        }
+
+        document.getElementById('play-btn').addEventListener('click', () => {
+            startNewGame(currentLevel);
+            showScreen('game-screen');
+        });
+
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            showScreen('settings-menu');
+        });
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            showScreen('main-menu');
+        });
+
+        document.getElementById('game-back-btn').addEventListener('click', () => {
+            showScreen('main-menu');
+        });
+
+        
+        document.getElementById('hint-btn').addEventListener('click', giveHint);
+        document.getElementById('check-btn').addEventListener('click', checkSolution);
+
+       
+        function generateSudoku(difficulty) {
+            const emptyBoard = Array(9).fill().map(() => Array(9).fill(0));
+            solveSudoku(emptyBoard);
+            solution = JSON.parse(JSON.stringify(emptyBoard));
+            
+            const cellsToRemove = {
+                easy: 40 + Math.floor(Math.random() * 5),
+                medium: 50 + Math.floor(Math.random() * 5),
+                hard: 60 + Math.floor(Math.random() * 5)
+            };
+            
+            return removeCells(emptyBoard, cellsToRemove[difficulty]);
+        }
+
+        function solveSudoku(board) {
+            const nums = [1,2,3,4,5,6,7,8,9];
+            shuffleArray(nums);
+            
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    if (board[i][j] === 0) {
+                        for (const num of nums) {
+                            if (isValid(board, i, j, num)) {
+                                board[i][j] = num;
+                                if (solveSudoku(board)) return true;
+                                board[i][j] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function removeCells(board, count) {
+            let removed = 0;
+            while (removed < count) {
+                const row = Math.floor(Math.random() * 9);
+                const col = Math.floor(Math.random() * 9);
+                if (board[row][col] !== 0) {
+                    board[row][col] = 0;
+                    removed++;
+                }
+            }
+            return board;
+        }
+
+        
+        function startNewGame(level) {
+            board = generateSudoku(level);
+            drawBoard();
+            document.getElementById('difficulty-badge').textContent = 
+                level === 'easy' ? 'KOLAY' : 
+                level === 'medium' ? 'ORTA' : 'ZOR';
+        }
+
+        function drawBoard() {
+            const grid = document.getElementById('sudoku-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    if (board[i][j] !== 0) {
+                        cell.textContent = board[i][j];
+                        cell.classList.add('fixed');
+                    } else {
+                        cell.addEventListener('click', () => selectCell(cell, i, j));
+                    }
+                    
+                    if (i % 3 === 0 && i !== 0) cell.style.borderTop = '2px solid var(--border-color)';
+                    if (j % 3 === 0 && j !== 0) cell.style.borderLeft = '2px solid var(--border-color)';
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function selectCell(cell, row, col) {
+            if (selectedCell) {
+                selectedCell.classList.remove('selected');
+                selectedCell.style.transform = 'scale(1)';
+            }
+            
+            selectedCell = cell;
+            cell.classList.add('selected');
+            cell.style.transform = 'scale(1.05)';
+            window.selectedRow = row;
+            window.selectedCol = col;
+        }
+
+        function giveHint() {
+            if (!selectedCell || selectedCell.classList.contains('fixed')) {
+                alert('Önce boş bir hücre seçin!');
+                return;
+            }
+            
+            const row = window.selectedRow;
+            const col = window.selectedCol;
+            selectedCell.textContent = solution[row][col];
+            board[row][col] = solution[row][col];
+            selectedCell.classList.add('fixed');
+            selectedCell.style.animation = 'pop 0.3s';
+            setTimeout(() => {
+                selectedCell.style.animation = '';
+            }, 300);
+        }
+
+        function checkSolution() {
+            let isComplete = true;
+            let isCorrect = true;
+            
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('error');
+                
+                if (!cell.textContent) {
+                    isComplete = false;
+                    return;
+                }
+                
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                if (!cell.classList.contains('fixed') && board[row][col] !== solution[row][col]) {
+                    isCorrect = false;
+                    cell.classList.add('error');
+                }
+            });
+            
+            if (!isComplete) {
+                alert('Önce tüm kutuları doldurmalısın!');
+            } else if (isCorrect) {
+                alert('Tebrikler! Sudoku doğru çözüldü!');
+            } else {
+                alert('Bazı hatalar var, kontrol et!');
+            }
+        }
+
+        
+        function isValid(board, row, col, num) {
+            for (let i = 0; i < 9; i++) {
+                if (board[row][i] === num || board[i][col] === num || 
+                    board[3*Math.floor(row/3)+Math.floor(i/3)][3*Math.floor(col/3)+(i%3)] === num) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        
+        document.getElementById('difficulty-select').addEventListener('change', (e) => {
+            currentLevel = e.target.value;
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            showScreen('main-menu');
+            document.getElementById('difficulty-select').value = currentLevel;
+        });
+    </script>
+</body>
+</html>
