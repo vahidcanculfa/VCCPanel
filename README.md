@@ -32,7 +32,7 @@ The Admin Panel is a simple web application developed with **PHP** for backend f
 1.  **Database:** A MySQL/MariaDB database is required with the name `????`.
 2.  **Credentials:** Update the database connection details in `home.php`:
     ```php
-    $db = new PDO('mysql:host=localhost;dbname=vahidcanculfa', '??????', '??????');
+    $db = new PDO('mysql:host=localhost;dbname=????????', '??????', '??????');
     ```
 3.  **Authentication:** The current hardcoded login credentials are:
     * **Username:** `admin`
