@@ -8,7 +8,7 @@ if (!isset($_SESSION['loggedin'])) {
     exit;
 }
 
-$db = new PDO('mysql:host=localhost;dbname=vahidcanculfa', 'vahidcanculfa', 'Vcc5807!?.,');
+$db = new PDO('mysql:host=localhost;dbname=???????????', '???????????', '???????????!?.,');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
